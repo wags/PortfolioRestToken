@@ -25,20 +25,34 @@ namespace PortfolioRestToken
         public string StorageType { get; set; }
     }
 
+    class Attributes
+    {
+        public List<string> Filename { get; set; }
+    }
+
     class Asset
     {
+        public int Id { get; set; }
+        public Attributes Attributes { get; set; }
+    }
+
+    class Response
+    {
         public int TotalNumberOfAssets { get; set; }
+        public List<Asset> Assets { get; set; }
     }
 
     class Program
     {
         public static string TargetCatalogId { get; private set; }
         public static int TotalNumberOfAssets { get; private set; }
+        public static int RandomId { get; private set; }
 
         static void Main(string[] args)
         {
             GetCatalogsAsync().Wait();
             FindNumberOfAssetsAsync().Wait();
+            FindRandomIdAsync().Wait();
         }
 
         private static async Task GetCatalogsAsync()
@@ -98,7 +112,7 @@ namespace PortfolioRestToken
                     var response = await client.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead);
                     response.EnsureSuccessStatusCode();
                     var stringResponse = response.Content.ReadAsStringAsync().Result;
-                    var assets = JsonConvert.DeserializeObject<Asset>(stringResponse);
+                    var assets = JsonConvert.DeserializeObject<Response>(stringResponse);
 
                     if (assets.TotalNumberOfAssets == 0)
                     {
@@ -114,6 +128,46 @@ namespace PortfolioRestToken
                 catch (HttpRequestException e)
                 {
                     Console.WriteLine($"[ Find Number of Assets ][ ERROR ! ] {e.Message}");
+                }
+            }
+
+            Console.ReadLine();
+        }
+
+        private static async Task FindRandomIdAsync()
+        {
+            var findIdUrl = $"{Constants.serverProtocol}://{Constants.serverAddress}:{Constants.serverPort}/api/v1/catalog/{TargetCatalogId}/asset/?session={Constants.apiToken}";
+            int rnd = new Random().Next(0, TotalNumberOfAssets);
+            var findIdData = $"{{\"fields\":[\"Item ID\",\"Filename\"],\"pageSize\":1,\"startingIndex\":{rnd},\"sortOptions\":{{\"field\":\"_id\",\"order\":\"desc\"}},}}";
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    var requestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri(findIdUrl),
+                        Content = new StringContent(findIdData, Encoding.UTF8, "application/json")
+                    };
+                    var response = await client.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead);
+                    response.EnsureSuccessStatusCode();
+                    var stringResponse = response.Content.ReadAsStringAsync().Result;
+                    var assets = JsonConvert.DeserializeObject<Response>(stringResponse);
+
+                    if (assets.TotalNumberOfAssets == 0)
+                    {
+                        Console.WriteLine($"[ Find Random ID ][ ERROR ! ] No Assets Available!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[ Assets Output ] {stringResponse}");
+                        Console.WriteLine($"[ Random Item ID ] = {assets.Assets[0].Id}");
+                        RandomId = assets.Assets[0].Id;
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"[ Find Random ID ][ ERROR ! ] {e.Message}");
                 }
             }
 
