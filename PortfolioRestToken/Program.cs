@@ -37,11 +37,11 @@ namespace PortfolioRestToken
 
         static void Main(string[] args)
         {
-            GetCatalogs().Wait();
+            GetCatalogsAsync().Wait();
             FindNumberOfAssetsAsync().Wait();
         }
 
-        private static async Task GetCatalogs()
+        private static async Task GetCatalogsAsync()
         {
             using (var client = new HttpClient())
             {
