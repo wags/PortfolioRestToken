@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -206,6 +207,8 @@ namespace PortfolioRestToken
 
                         RandomFilename = assets.Assets[0].Attributes.Filename[0];
                         Console.WriteLine($"[ Random Filename ] = {RandomFilename}");
+
+                        SaveRandomPreviewAsync().Wait();
                     }
                 }
                 catch (HttpRequestException e)
@@ -213,8 +216,37 @@ namespace PortfolioRestToken
                     Console.WriteLine($"[ Get Asset ][ ERROR ! ] {e.Message}");
                 }
             }
+        }
 
-            Console.ReadLine();
+        private static async Task SaveRandomPreviewAsync()
+        {
+            try
+            {
+                System.IO.Directory.CreateDirectory(Constants.imagesPath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Could not create directory.");
+            }
+
+            var saveRandomUrl = $"{Constants.serverProtocol}://{Constants.serverAddress}:{Constants.serverPort}/api/v1/catalog/{TargetCatalogId}/asset/{RandomId}/preview?session={Constants.apiToken}";
+
+            RandomFilename = Path.ChangeExtension(RandomFilename, "jpg");
+
+            Console.WriteLine($"[ Save Random Item's Preview ][ Saving ! ][ {RandomFilename} ]");
+
+            using (var client = new HttpClient())
+            {
+                using (HttpResponseMessage response = await client.GetAsync(saveRandomUrl, HttpCompletionOption.ResponseHeadersRead))
+                using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
+                {
+                    string fileToWriteTo = Path.Combine(Constants.imagesPath, RandomFilename);
+                    using (Stream streamToWriteTo = File.Open(fileToWriteTo, FileMode.Create))
+                    {
+                        await streamToReadFrom.CopyToAsync(streamToWriteTo);
+                    }
+                }
+            }
         }
     }
 }
