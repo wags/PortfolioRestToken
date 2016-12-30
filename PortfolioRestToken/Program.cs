@@ -47,12 +47,14 @@ namespace PortfolioRestToken
         public static string TargetCatalogId { get; private set; }
         public static int TotalNumberOfAssets { get; private set; }
         public static int RandomId { get; private set; }
+        public static string RandomFilename { get; private set; }
 
         static void Main(string[] args)
         {
             GetCatalogsAsync().Wait();
             FindNumberOfAssetsAsync().Wait();
             FindRandomIdAsync().Wait();
+            GetAssetAsync().Wait();
         }
 
         private static async Task GetCatalogsAsync()
@@ -168,6 +170,47 @@ namespace PortfolioRestToken
                 catch (HttpRequestException e)
                 {
                     Console.WriteLine($"[ Find Random ID ][ ERROR ! ] {e.Message}");
+                }
+            }
+
+            Console.ReadLine();
+        }
+
+        private static async Task GetAssetAsync()
+        {
+            var getAssetUrl = $"{Constants.serverProtocol}://{Constants.serverAddress}:{Constants.serverPort}/api/v1/catalog/{TargetCatalogId}/asset/?session={Constants.apiToken}";
+            var getAssetData = $"{{\"fields\":[\"Item ID\",\"Filename\",\"Keywords\"],\"pageSize\":10,\"startingIndex\":0,\"sortOptions\":{{\"field\":\"_id\",\"order\":\"desc\"}},\"term\":{{\"operator\":\"equalValue\",\"field\":\"_id\",\"values\":[\"{RandomId}\"]}}}}";
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    var requestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri(getAssetUrl),
+                        Content = new StringContent(getAssetData, Encoding.UTF8, "application/json")
+                    };
+                    var response = await client.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead);
+                    response.EnsureSuccessStatusCode();
+                    var stringResponse = response.Content.ReadAsStringAsync().Result;
+                    var assets = JsonConvert.DeserializeObject<Response>(stringResponse);
+
+                    if (assets.TotalNumberOfAssets == 0)
+                    {
+                        Console.WriteLine($"[ Get Asset ][ ERROR ! ] No Assets Available!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[ Assets Output ] {stringResponse}");
+                        Console.WriteLine($"[ Random Item ID ] = {assets.Assets[0].Id}");
+
+                        RandomFilename = assets.Assets[0].Attributes.Filename[0];
+                        Console.WriteLine($"[ Random Filename ] = {RandomFilename}");
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"[ Get Asset ][ ERROR ! ] {e.Message}");
                 }
             }
 
