@@ -227,7 +227,7 @@ namespace PortfolioRestToken
             }
             catch (Exception e)
             {
-                Console.WriteLine("Could not create directory.");
+                Console.WriteLine($"[ Save Random Item's Preview ][ ERROR ! ] {e.Message}");
             }
 
             var saveRandomUrl = $"{Constants.serverProtocol}://{Constants.serverAddress}:{Constants.serverPort}/api/v1/catalog/{TargetCatalogId}/asset/{RandomId}/preview?session={Constants.apiToken}";
