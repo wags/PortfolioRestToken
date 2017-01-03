@@ -61,6 +61,7 @@ namespace PortfolioRestToken
             FindNumberOfAssetsAsync().Wait();
             FindRandomIdAsync().Wait();
             GetAssetAsync().Wait();
+            LogoutAsync().Wait();
 
             Console.ReadLine();
         }
@@ -260,6 +261,30 @@ namespace PortfolioRestToken
             catch (Exception e)
             {
                 Console.WriteLine($"[ Save Random Item's Metadata ][ ERROR ! ] {e.Message}");
+            }
+        }
+
+        private static async Task LogoutAsync()
+        {
+            var logoutUrl = $"{Constants.serverProtocol}://{Constants.serverAddress}:{Constants.serverPort}/api/v1/auth/logout?session={Constants.apiToken}";
+            var logoutData = "{}";
+
+            try
+            {
+                var requestMessage = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(logoutUrl),
+                    Content = new StringContent(logoutData, Encoding.UTF8, "application/json")
+                };
+                var response = await Client.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead);
+                response.EnsureSuccessStatusCode();
+
+                Console.WriteLine($"[ Logout ][ - Session Logout Successful - ]");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[ Logout ][ ERROR ! ] {e.Message}");
             }
         }
     }
