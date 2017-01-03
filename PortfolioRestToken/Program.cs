@@ -204,6 +204,7 @@ namespace PortfolioRestToken
                     if (RandomMetadata != null)
                     {
                         Console.WriteLine($"[ Random Metadata ] = {RandomMetadata}");
+                        SaveRandomMetadata();
                     }
                     else
                     {
@@ -242,6 +243,23 @@ namespace PortfolioRestToken
                 {
                     await streamToReadFrom.CopyToAsync(streamToWriteTo);
                 }
+            }
+        }
+
+        private static void SaveRandomMetadata()
+        {
+            RandomFilename = Path.ChangeExtension(RandomFilename, "txt");
+
+            Console.WriteLine($"[ Save Random Item's Metadata ][ Saving ! ][ {RandomFilename} ]");
+
+            try
+            {
+                System.IO.Directory.CreateDirectory(Constants.metadataPath);
+                File.WriteAllText(Path.Combine(Constants.metadataPath, RandomFilename), RandomMetadata);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[ Save Random Item's Metadata ][ ERROR ! ] {e.Message}");
             }
         }
     }
