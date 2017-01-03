@@ -56,6 +56,8 @@ namespace PortfolioRestToken
             FindNumberOfAssetsAsync().Wait();
             FindRandomIdAsync().Wait();
             GetAssetAsync().Wait();
+
+            Console.ReadLine();
         }
 
         private static async Task GetCatalogsAsync()
@@ -94,8 +96,6 @@ namespace PortfolioRestToken
                     Console.WriteLine($"[ Get Catalogs ][ ERROR ! ] {e.Message}");
                 }
             }
-
-            Console.ReadLine();
         }
 
         private static async Task FindNumberOfAssetsAsync()
@@ -133,8 +133,6 @@ namespace PortfolioRestToken
                     Console.WriteLine($"[ Find Number of Assets ][ ERROR ! ] {e.Message}");
                 }
             }
-
-            Console.ReadLine();
         }
 
         private static async Task FindRandomIdAsync()
@@ -173,8 +171,6 @@ namespace PortfolioRestToken
                     Console.WriteLine($"[ Find Random ID ][ ERROR ! ] {e.Message}");
                 }
             }
-
-            Console.ReadLine();
         }
 
         private static async Task GetAssetAsync()
