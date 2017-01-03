@@ -29,6 +29,7 @@ namespace PortfolioRestToken
     class Attributes
     {
         public List<string> Filename { get; set; }
+        public List<string> Keywords { get; set; }
     }
 
     class Asset
@@ -52,6 +53,7 @@ namespace PortfolioRestToken
         public static int TotalNumberOfAssets { get; private set; }
         public static int RandomId { get; private set; }
         public static string RandomFilename { get; private set; }
+        public static string RandomMetadata { get; private set; }
 
         static void Main(string[] args)
         {
@@ -197,6 +199,16 @@ namespace PortfolioRestToken
                     Console.WriteLine($"[ Random Filename ] = {RandomFilename}");
 
                     SaveRandomPreviewAsync().Wait();
+
+                    RandomMetadata = string.Join(", ", assets.Assets[0].Attributes.Keywords.ToArray());
+                    if (RandomMetadata != null)
+                    {
+                        Console.WriteLine($"[ Random Metadata ] = {RandomMetadata}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[ Save Random Metadata ][ ERROR ! ] - [ No Available Keywords! ]");
+                    }
                 }
             }
             catch (HttpRequestException e)
